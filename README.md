@@ -1,7 +1,7 @@
-ac297r-capstone-project
+Somerville Parking
 ==============================
 
-AC297r Capstone
+This project is being completed as a part of Harvard's [AC297r Capstone](https://www.capstone.iacs.seas.harvard.edu/) course in the fall of 2019.
 
 Project Organization
 ------------
@@ -26,6 +26,16 @@ Project Organization
     │   └── partners-reports
     └── test_project.py
 
+
+--------
+
+
+Team Members
+------------
+- Joshua Feldman
+- Lipika Ramawamy
+- Anthony Rentsch
+- Kevin Rader (mentor)
 
 --------
 
