@@ -1,11 +1,14 @@
 from media_api import MediaApi
 import numpy as np
+import configparser
 
 if __name__ == '__main__':
     # Checking to see if things work
 
     url = 'https://api.ap.org/media'
-    apikey = '6a48e4eqimogwb9g88rntwanda'
+    config = configparser.ConfigParser()
+    config.read('password.ini')
+    apikey = (config['key']['apikey'])
     media_api = MediaApi(url, apikey)
 
     # If you don't have any data files and want to make a request, do this
