@@ -1,6 +1,10 @@
 # local package
 -e .
 
+# core
+rasterio
+matplotlib
+
 # external requirements
 click
 Sphinx
