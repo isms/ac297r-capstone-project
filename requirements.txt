@@ -4,6 +4,7 @@
 # core
 rasterio
 matplotlib
+pandas
 
 # external requirements
 click
