@@ -5,6 +5,8 @@
 rasterio
 matplotlib
 pandas
+tensorflow
+scikit-image
 
 # external requirements
 click
