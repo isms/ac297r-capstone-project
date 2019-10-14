@@ -104,10 +104,12 @@ def simple_data_generator(data_dir = '../data/raster_sample/',
 
 	# read in .tif files
 	all_rasters = []
-	for f in raster_names:
+	label_row_inds = []
+	for i, f in enumerate(raster_names):
 		try:
 			img = Raster(data_dir, f)
 			all_rasters.append(img.arr)
+			label_row_inds.append(i)
 		except:
 			pass
 
@@ -116,7 +118,7 @@ def simple_data_generator(data_dir = '../data/raster_sample/',
 	# turn into np
 
 	# pull labels
-	image_labels = labels_df[label_col]
+	image_labels = labels_df[labels_df[label_col].isin(raster_names)][label_col]
 
 	return (all_rasters, image_labels)
 
