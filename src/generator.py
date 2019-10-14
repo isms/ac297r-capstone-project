@@ -6,7 +6,7 @@ import random
 import pandas as pd
 
 def data_generator(batch_size, data_dir = '../data/raster_sample/', 
-				   label_path='../labels/labels_full.csv'):
+				   label_path='../labels/labels_full.csv', label_col='driveway_label'):
 	"""
 	Generator function to be used during model training.
 
@@ -18,6 +18,8 @@ def data_generator(batch_size, data_dir = '../data/raster_sample/',
 		Location of directory with images.
 	label_path : str
 		Location of csv with labels.
+	label_col : str
+		Name of column with label.
 
 	Yields
 	------
@@ -61,7 +63,8 @@ def data_generator(batch_size, data_dir = '../data/raster_sample/',
 
 
 def simple_data_generator(data_dir = '../data/raster_sample/', 
-						  label_path='../labels/labels_full.csv'):
+						  label_path='../labels/labels_full.csv', 
+						  label_col='driveway_label'):
 	"""
 	Simple Generator function to be used during model training. This 
 	function has no batch_size argument.
@@ -72,6 +75,8 @@ def simple_data_generator(data_dir = '../data/raster_sample/',
 		Location of directory with images.
 	label_path : str
 		Location of csv with labels.
+	label_col : str
+	Name of column with label.
 
 	Yields
 	------
@@ -92,6 +97,7 @@ def simple_data_generator(data_dir = '../data/raster_sample/',
 	#raster_names = list(set([f for f in listdir(data_dir) if re.match('.*\.TIF$', f)]))
 	labels_df = pd.read_csv(label_path)
 	raster_names = labels_df.iloc[:,0].to_list()
+	print(raster_names)
 
 
 	#while 1: # needed for Keras generator
@@ -99,15 +105,18 @@ def simple_data_generator(data_dir = '../data/raster_sample/',
 	# read in .tif files
 	all_rasters = []
 	for f in raster_names:
-		img = Raster(data_dir, f)
-		all_rasters.append(img.arr)
+		try:
+			img = Raster(data_dir, f)
+			all_rasters.append(img.arr)
+		except:
+			pass
 
 	# rotate and resize
 
 	# turn into np
 
 	# pull labels
-	image_labels = labels_df['driveway_label']
+	image_labels = labels_df[label_col]
 
 	return (all_rasters, image_labels)
 
