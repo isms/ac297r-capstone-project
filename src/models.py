@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 
-def baseline_cnn(image_height, image_width, channels, ):
+def baseline_cnn(image_height, image_width, channels):
     """baseline cnn for image classification
     from: https://www.tensorflow.org/tutorials/images/cnn
     """
