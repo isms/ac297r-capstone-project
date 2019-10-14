@@ -3,8 +3,10 @@ from os import listdir
 from os.path import isfile, join
 import re
 import random
+import pandas as pd
 
-def data_generator(batch_size, data_dir = '../data/raster_sample/'):
+def data_generator(batch_size, data_dir = '../data/raster_sample/', 
+				   label_path='../labels/labels_full.csv'):
 	"""
 	Generator function to be used during model training.
 
@@ -14,16 +16,24 @@ def data_generator(batch_size, data_dir = '../data/raster_sample/'):
 		Number of images to include in batch.
 	data_dir : str
 		Location of directory with images.
+	label_path : str
+		Location of csv with labels.
 
 	Yields
 	------
 	images : np.ndarray
 		Array of size (batch_size, X, Y, 3).
-		batch_size = number of images
-		X = dimension 1 of image (may have to pad)
-		Y = dimension 2 of image (may have to pad)
-		3 = number of channels (this can be tweaked in src.raster.Raster)
+			batch_size = number of images
+			X = dimension 1 of image (may have to pad)
+			Y = dimension 2 of image (may have to pad)
+			3 = number of channels (this can be tweaked in src.raster.Raster)
+	image_labels : array-like
+		Array of size batch_size. 
 	"""
+
+	# TEMP
+	images = 1
+	image_labels = 1
 
 	raster_names = list(set([f for f in listdir(data_dir) if re.match('.*\.TIF$', f)]))
 
@@ -47,4 +57,57 @@ def data_generator(batch_size, data_dir = '../data/raster_sample/'):
 			# pull labels
 
 
-	return batches # TEMP
+		yield (images, image_labels) 
+
+
+def simple_data_generator(data_dir = '../data/raster_sample/', 
+						  label_path='../labels/labels_full.csv'):
+	"""
+	Simple Generator function to be used during model training. This 
+	function has no batch_size argument.
+
+	Parameters
+	----------
+	data_dir : str
+		Location of directory with images.
+	label_path : str
+		Location of csv with labels.
+
+	Yields
+	------
+	images : np.ndarray
+		Array of size (n, X, Y, 3).
+			label_path.shape[0] = number of images
+			X = dimension 1 of image (may have to pad)
+			Y = dimension 2 of image (may have to pad)
+			3 = number of channels (this can be tweaked in src.raster.Raster)
+	image_labels : array-like
+		Array of size label_path.shape[0]. 
+	"""
+
+	# TEMP
+	images = 1
+
+	# set up
+	#raster_names = list(set([f for f in listdir(data_dir) if re.match('.*\.TIF$', f)]))
+	labels_df = pd.read_csv(label_path)
+	raster_names = labels_df.iloc[:,0].to_list()
+
+
+	#while 1: # needed for Keras generator
+
+	# read in .tif files
+	all_rasters = []
+	for f in raster_names:
+		img = Raster(data_dir, f)
+		all_rasters.append(img.arr)
+
+	# rotate and resize
+
+	# turn into np
+
+	# pull labels
+	image_labels = labels_df['driveway_label']
+
+	return (all_rasters, image_labels)
+
