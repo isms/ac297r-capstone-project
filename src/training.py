@@ -5,15 +5,15 @@ from sklearn.model_selection import train_test_split
 from src.models import baseline_cnn
 from src.generator import DataGenerator, load_images
 
-def train_baseline(image_dim, epochs, batch_size):
+def train_baseline(image_dim, epochs, batch_size, label_path='./labels/labels.csv', label_col='label'):
     # load labelled data
-    label_df = pd.read_csv('./labels/labels.csv', index_col = 0)
+    label_df = pd.read_csv(label_path)
 
     # load labelled data
-    label_col = 'label'
     valid_labels = [0, 1]
-    label_df = label_df[label_df[label_col].isin(valid_labels)]
-    label_df['filename'] = label_df.index
+    # TEMP FIX
+    bad_parcels = ['parcel9999.TIF']
+    label_df = label_df[(label_df[label_col].isin(valid_labels)) & (~label_df[filename].isin(bad_parcels))]
 
     #balance training data
     label_df_1 = label_df[label_df[label_col] == 1]
@@ -28,8 +28,10 @@ def train_baseline(image_dim, epochs, batch_size):
     train, test = train_test_split(label_df, test_size=0.2, random_state=42)
 
     # initialize generators
-    training_generator = DataGenerator(train, batch_size = batch_size, image_dim = image_dim)
-    validation_generator = DataGenerator(test, batch_size = len(test), image_dim = image_dim)
+    training_generator = DataGenerator(train, batch_size = batch_size, image_dim = image_dim, 
+                                       data_dir = data_dir, label_col = label_col)
+    validation_generator = DataGenerator(test, batch_size = len(test), image_dim = image_dim, 
+                                         data_dir = data_dir, label_col = label_col)
 
     # initialize model
     model = baseline_cnn(image_dim)
@@ -41,22 +43,24 @@ def train_baseline(image_dim, epochs, batch_size):
     )
     return model
 
-def train_data_augmentation(image_dim, epochs, batch_size):
+def train_data_augmentation(image_dim, epochs, batch_size, label_path='./labels/labels.csv', 
+                            label_col='label', data_dir='./data/raster_sample/'):
     # load labelled data
-    label_df = pd.read_csv('./labels/labels.csv', index_col = 0)
+    label_df = pd.read_csv(label_path)
 
     # load labelled data
-    label_col = 'label'
     valid_labels = [0, 1]
-    label_df = label_df[label_df[label_col].isin(valid_labels)]
-    label_df['filename'] = label_df.index
+       # TEMP FIX
+    bad_parcels = ['parcel9999.TIF']
+    label_df = label_df[(label_df[label_col].isin(valid_labels)) & (~label_df.filename.isin(bad_parcels))]
 
     # split data
     train, test = train_test_split(label_df, test_size=0.2, random_state=42)
-    print(test)
+    #print(test)
 
     # initialize validation data generator
-    validation_generator = DataGenerator(test, batch_size = len(test), image_dim = image_dim)
+    validation_generator = DataGenerator(test, batch_size = len(test), image_dim = image_dim, 
+                                         data_dir = data_dir, label_col = label_col)
 
     #balance training data
     train_1 = train[train[label_col] == 1]
@@ -67,7 +71,7 @@ def train_data_augmentation(image_dim, epochs, batch_size):
         train_1 = train_1.sample(n=len(train_0), replace = True)
     train = pd.concat([train_1, train_0]).sample(frac = 1)
 
-    X_train, y_train = load_images(train, label_col, image_dim)
+    X_train, y_train = load_images(train, label_col, image_dim, data_dir)
 
     datagen = ImageDataGenerator(
         featurewise_center=True,
@@ -89,7 +93,7 @@ def train_data_augmentation(image_dim, epochs, batch_size):
                         validation_data = validation_generator,
                         steps_per_epoch=len(X_train) / batch_size, epochs=epochs)
 
-    return model
+    return model, datagen
 
 
 if __name__ == "__main__":
