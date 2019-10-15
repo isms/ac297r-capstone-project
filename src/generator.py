@@ -12,18 +12,14 @@ class DataGenerator(Sequence):
 	more info: https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
 	"""
-	def __init__(self, batch_size = 10, image_dim = (100, 100, 5), data_dir = './data/raster_sample/', label_path='./labels/labels.csv', label_col='label'):
+	def __init__(self, label_df, batch_size = 10, image_dim = (100, 100, 5), data_dir = './data/raster_sample/', label_col='label'):
 		"""Initialization"""
 		self.batch_size = batch_size
 		self.image_dim = image_dim
 		self.data_dir = data_dir
-		self.label_path = label_path
 		self.label_col = label_col
+		self.label_df = label_df
 
-		self.label_df = pd.read_csv(label_path, index_col = 0)
-		valid_labels = [0, 1]
-		self.label_df = self.label_df[self.label_df[label_col].isin(valid_labels)]
-		self.label_df['filename'] = self.label_df.index
 
 	def __len__(self):
 		"""Denotes the number of batches per epoch"""
@@ -55,6 +51,15 @@ class DataGenerator(Sequence):
 			X[idx] = r.clean(self.image_dim)
 		return X
 
+def load_images(label_df, label_col, image_dim, data_dir = './data/raster_sample/'):
+	y = label_df[label_col].values
+
+	X_dim = tuple([len(label_df)]) + image_dim
+	X = np.zeros(X_dim)
+	for idx, file in enumerate(label_df.filename):
+		r = Raster(data_dir, file)
+		X[idx] = r.clean(image_dim)
+	return X, y
 
 if __name__ == "__main__":
 	dg = DataGenerator(10, (100, 100, 3))
