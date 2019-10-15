@@ -12,7 +12,7 @@ class DataGenerator(Sequence):
 	more info: https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 
 	"""
-	def __init__(self, batch_size, image_dim, data_dir = './data/raster_sample/', label_path='./labels/labels.csv', label_col='label'):
+	def __init__(self, batch_size = 10, image_dim = (100, 100, 5), data_dir = './data/raster_sample/', label_path='./labels/labels.csv', label_col='label'):
 		"""Initialization"""
 		self.batch_size = batch_size
 		self.image_dim = image_dim
