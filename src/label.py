@@ -9,8 +9,8 @@ data_dir = '../data/raster_sample/'
 label_path = '../labels/labels_full.csv' #'../labels/labels.csv'
 
 def load_labels(label_path):
-    df = pd.read_csv(label_path, index_col=0)
-    return set(df.index)
+    df = pd.read_csv(label_path)
+    return set(df.filename)
 
 def get_label(f):
     img = Raster(data_dir, f)
