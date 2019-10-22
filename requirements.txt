@@ -8,6 +8,7 @@ pandas
 tensorflow
 scikit-image
 scikit-learn
+google_streetview
 
 # external requirements
 click
