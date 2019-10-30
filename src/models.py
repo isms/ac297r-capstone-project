@@ -24,8 +24,7 @@ def baseline_cnn(image_dim = (100, 100, 5)):
 
 
 def combined_cnn(gsv_image_dim = (300, 300, 3), sat_image_dim = (100, 100, 5), n_classes = 3):
-    """baseline cnn for image classification
-    from: https://www.tensorflow.org/tutorials/images/cnn
+    """Combined CNN using satellite and Street View imagery.
     """
 
     # 1. Google Street View (GSV) Image Input
