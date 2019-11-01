@@ -17,7 +17,7 @@ def gen_flow_for_two_inputs(sample, aerial_dir = '../data/training/aerial_images
 	aerial_gen = aerial_gen.flow_from_dataframe(sample, directory = aerial_dir, x_col= 'aerial_filename', y_col='temp_label', target_size=(aer_image_dim[0], aer_image_dim[1]), color_mode='rgba', class_mode='categorical', batch_size=batch_size, shuffle=True, seed=100)
 
 	# generator for gsv images
-	gsv_gen = aerial_gen.flow_from_dataframe(sample, directory = gsv_dir, x_col= 'aerial_filename', y_col='temp_label', target_size=(gsv_image_dim[0], gsv_image_dim[1]), color_mode='rgb',class_mode='categorical',batch_size=batch_size,shuffle=True,seed=100)
+	gsv_gen = gsv_gen.flow_from_dataframe(sample, directory = gsv_dir, x_col= 'gsv_filename', y_col='temp_label', target_size=(gsv_image_dim[0], gsv_image_dim[1]), color_mode='rgb',class_mode='categorical',batch_size=batch_size,shuffle=True,seed=100)
 
 	# put both together
 	while True:
