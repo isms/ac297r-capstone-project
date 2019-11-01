@@ -5,12 +5,12 @@ from tensorflow.keras.utils import Sequence
 import numpy as np
 from src.raster import Raster
 
-from keras.preprocessing.image import ImageDataGenerator
+from keras_preprocessing.image import ImageDataGenerator
 
 ### New generator for model with two inputs
-def gen_flow_for_two_inputs(sample, aerial_dir = '../data/training/aerial_images/', gsv_dir ='data/training/street_view_images/', batch_size = 32, gsv_image_dim = (640, 640, 3), aer_image_dim = ((2100, 2100, 4))):
+def gen_flow_for_two_inputs(sample, aerial_dir = '../data/training/aerial_images/', gsv_dir ='../data/training/street_view_images/', batch_size = 32, gsv_image_dim = (640, 640, 3), aer_image_dim = ((2100, 2100, 4))):
 
-	aerial_gen = ImageDataGenerator(horizontal_flip = True, vertical_flip = True, width_shift_range = 0.1,height_shift_range = 0.1,zoom_range = 0.1,rotation_range = 40)
+	aerial_gen = ImageDataGenerator(horizontal_flip = True, vertical_flip = True, width_shift_range = 0.1,height_shift_range = 0.1, zoom_range = 0.1, rotation_range = 40)
 	gsv_gen = ImageDataGenerator()
 
 	# generator for aerial images
