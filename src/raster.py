@@ -23,6 +23,12 @@ class Raster:
         ax.imshow(self.arr)
         plt.show()
 
+    def savefig(self, *args, **kwargs):
+        fig, ax = plt.subplots(figsize=(7, 7))
+        ax.imshow(self.arr)
+        plt.savefig(*args, **kwargs)
+        plt.show()
+
     def clean(self, image_dim):
         height, width, channels = image_dim
         image = (self.src
