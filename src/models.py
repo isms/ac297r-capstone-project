@@ -72,7 +72,7 @@ def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)
     # 4. Dense layers + classification
     full_embedding = layers.Dense(300, activation='relu')(concat)
     full_embedding = layers.Dense(100, activation='relu')(full_embedding)
-    output = layers.Dense(n_classes, activation='softmax')(full_embedding)
+    output = layers.Dense(n_classes, activation='sigmoid')(full_embedding)
 
     # 5. define full model and compile
     model = models.Model(inputs=[gsv_input_img, sat_input_img], outputs=output)
