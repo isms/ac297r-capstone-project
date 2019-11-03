@@ -1,5 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
+from keras import backend as K
+
 
 def baseline_cnn(image_dim = (100, 100, 5)):
     """baseline cnn for image classification
@@ -23,9 +25,21 @@ def baseline_cnn(image_dim = (100, 100, 5)):
     return model
 
 def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)), n_classes = 2):
+
     """
     Combined CNN using satellite and Street View imagery.
     """
+    # functions from http://www.deepideas.net/unbalanced-classes-machine-learning/
+    def sensitivity(y_true, y_pred):
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        return true_positives / (possible_positives + K.epsilon())
+
+    def specificity(y_true, y_pred):
+        true_negatives = K.sum(K.round(K.clip((1-y_true) * (1-y_pred), 0, 1)))
+        possible_negatives = K.sum(K.round(K.clip(1-y_true, 0, 1)))
+        return true_negatives / (possible_negatives + K.epsilon())
+
     # 1. Google Street View (GSV) Image Input
     gsv_input_img = layers.Input(shape=gsv_image_dim, name='gsv_image_input')
 
@@ -62,6 +76,6 @@ def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)
 
     # 5. define full model and compile
     model = models.Model(inputs=[gsv_input_img, sat_input_img], outputs=output)
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', sensitivity, specificity])
 
     return model
