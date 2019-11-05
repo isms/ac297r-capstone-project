@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 from keras import backend as K
-
+from tensorflow.keras import optimizers
 
 def baseline_cnn(image_dim = (100, 100, 5)):
     """baseline cnn for image classification
@@ -24,7 +24,7 @@ def baseline_cnn(image_dim = (100, 100, 5)):
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     return model
 
-def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)), n_classes = 2):
+def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)), n_classes = 2, loss_fn = 'binary_crossentropy'):
 
     """
     Combined CNN using satellite and Street View imagery.
@@ -47,8 +47,6 @@ def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)
     gsv_cnn = layers.MaxPooling2D((2,2))(gsv_cnn)
     gsv_cnn = layers.Conv2D(64, (3,3), activation = 'relu')(gsv_cnn)
     gsv_cnn = layers.MaxPooling2D((2,2))(gsv_cnn)
-    gsv_cnn = layers.Conv2D(64, (3,3), activation = 'relu')(gsv_cnn)
-    gsv_cnn = layers.MaxPooling2D((2,2))(gsv_cnn)
     gsv_cnn = layers.Conv2D(32, (3,3), activation = 'relu')(gsv_cnn)
     gsv_flat = layers.Flatten()(gsv_cnn)
     gsv_image_embedding = layers.Dense(200, activation='relu')(gsv_flat)
@@ -57,14 +55,14 @@ def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)
     sat_input_img = layers.Input(shape=sat_image_dim, name='aerial_image_input')
 
     sat_cnn = layers.Conv2D(128, (3,3), activation = 'relu')(sat_input_img)
-    sat_cnn = layers.MaxPooling2D((2,2))(gsv_cnn)
-    sat_cnn = layers.Conv2D(64, (3,3), activation = 'relu')(sat_cnn)
     sat_cnn = layers.MaxPooling2D((2,2))(sat_cnn)
     sat_cnn = layers.Conv2D(64, (3,3), activation = 'relu')(sat_cnn)
     sat_cnn = layers.MaxPooling2D((2,2))(sat_cnn)
     sat_cnn = layers.Conv2D(32, (3,3), activation = 'relu')(sat_cnn)
     sat_flat = layers.Flatten()(sat_cnn)
     sat_image_embedding = layers.Dense(200, activation='relu')(sat_flat)
+
+
 
     # 3. Concatenate embeddings
     concat = layers.Concatenate(axis=1)([gsv_image_embedding, sat_image_embedding])
@@ -76,6 +74,13 @@ def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)
 
     # 5. define full model and compile
     model = models.Model(inputs=[gsv_input_img, sat_input_img], outputs=output)
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy', sensitivity, specificity])
+
+    adam = optimizers.Adam(lr=1e-5, beta_1=0.9, beta_2=0.999, amsgrad=False)
+
+    model.compile(loss=loss_fn, optimizer=adam, metrics=['accuracy', sensitivity, specificity])
 
     return model
+
+if __name__ == "__main__":
+    model = combined_cnn()
+    print(model.summary())
