@@ -3,33 +3,50 @@ import random
 import pandas as pd
 from tensorflow.keras.utils import Sequence
 import numpy as np
-from src.raster import Raster
-
-from keras_preprocessing.image import ImageDataGenerator
+# from src.raster import Raster
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 ### New generator for model with two inputs
 def generator_two_inputs(sample, aerial_dir = '../data/training/aerial_images/', gsv_dir ='../data/training/sv_images/', batch_size = 32, aer_image_dim = (2100, 2100, 4), gsv_image_dim = (640, 640, 3) , y_column = 'final_label'):
 
-	# generator for aerial images
-	aerial_gen_obj = ImageDataGenerator(horizontal_flip = True, vertical_flip = True, width_shift_range = 0.1,height_shift_range = 0.1, zoom_range = 0.1, rotation_range = 40)
-
-	aerial_gen = aerial_gen_obj.flow_from_dataframe(sample, directory = aerial_dir, x_col= 'aerial_filename', y_col= y_column, target_size=(aer_image_dim[0], aer_image_dim[1]), color_mode='rgba', class_mode='binary', batch_size=batch_size, shuffle=True, seed=100)
-
 	# generator for gsv images
 	gsv_gen_obj = ImageDataGenerator()
-
 	gsv_gen = gsv_gen_obj.flow_from_dataframe(sample, directory = '../data/training/sv_images/', x_col= 'gsv_filename', y_col=y_column, target_size=(gsv_image_dim[0], gsv_image_dim[1]), color_mode='rgb',class_mode='binary',batch_size=batch_size,shuffle=True,seed=100)
+
+	# generator for aerial images
+	aerial_gen_obj = ImageDataGenerator(horizontal_flip = True, vertical_flip = True, width_shift_range = 0.1,height_shift_range = 0.1, zoom_range = 0.1, rotation_range = 40)
+	aerial_gen = aerial_gen_obj.flow_from_dataframe(sample, directory = aerial_dir, x_col= 'aerial_filename', y_col= y_column, target_size=(aer_image_dim[0], aer_image_dim[1]), color_mode='rgba', class_mode='binary', batch_size=batch_size, shuffle=True, seed=100)
 
 	# put both together
 	while True:
-		X1_i = gsv_gen.next()
-		X2_i = aerial_gen.next()
+		gsv_i = gsv_gen.next()
+		aerial_i = aerial_gen.next()
 		# print(X1_i[1])
 		# print(X1_i[1].shape)
 		#Assert arrays are equal - this was for peace of mind, but slows down training
 		#np.testing.assert_array_equal(X1i[0],X2i[0])
-		yield [X1_i[0], X2_i[0]], X1_i[1]
+		yield [gsv_i[0], aerial_i[0]], gsv_i[1]
 
+### New generator for model with two image inputs and tabular inputs
+def generator_three_inputs(sample, tabular_data, tabular_predictor_cols, aerial_dir = '../data/training/aerial_images/', gsv_dir ='../data/training/sv_images/', batch_size = 32, aer_image_dim = (2100, 2100, 4), gsv_image_dim = (640, 640, 3) , y_column = 'final_label'):
+
+	# generator for gsv images
+	gsv_gen_obj = ImageDataGenerator()
+	gsv_gen = gsv_gen_obj.flow_from_dataframe(sample, directory = '../data/training/sv_images/', x_col= 'gsv_filename', y_col='MBL', target_size=(gsv_image_dim[0], gsv_image_dim[1]), color_mode='rgb',class_mode='raw',batch_size=batch_size,shuffle=True,seed=100)
+
+	# generator for aerial images
+	aerial_gen_obj = ImageDataGenerator(horizontal_flip = True, vertical_flip = True, width_shift_range = 0.1,height_shift_range = 0.1, zoom_range = 0.1, rotation_range = 40)
+	aerial_gen = aerial_gen_obj.flow_from_dataframe(sample, directory = aerial_dir, x_col= 'aerial_filename', y_col= y_column, target_size=(aer_image_dim[0], aer_image_dim[1]), color_mode='rgba', class_mode='binary', batch_size=batch_size, shuffle=True, seed=100)
+
+	# put both together
+	while True:
+		gsv_i = gsv_gen.next()
+		aerial_i = aerial_gen.next()
+		tabular_data_i = (tabular_data.loc[tabular_data.MBL.isin(gsv_i[1]), tabular_predictor_cols]).values
+		# print(tabular_data_i.shape)
+		# print(aerial_i[1])
+
+		yield [gsv_i[0], aerial_i[0], tabular_data_i], aerial_i[1]
 
 
 class DataGenerator(Sequence):
