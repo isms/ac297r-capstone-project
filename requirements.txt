@@ -9,7 +9,8 @@ tensorflow
 scikit-image
 scikit-learn
 google_streetview
-
+xlrd
+seaborn
 # external requirements
 click
 Sphinx
