@@ -40,7 +40,7 @@ def street_view_cnn(pretrained_model, image_dim, optimizer, loss, n_classes=3, a
     '''
     
     # 1. Prepare imput image
-    sv_input_img = keras.layers.Input(shape=image_dim, name='satellite_image_input')
+    sv_input_img = keras.layers.Input(shape=image_dim, name='streetview_image_input')
     
     # 2. Pass input image through pretrained model - note that this model is set to trainable/non0tr
     pre_trained_embedding = pretrained_model(sv_input_img)
@@ -49,19 +49,22 @@ def street_view_cnn(pretrained_model, image_dim, optimizer, loss, n_classes=3, a
     flat_pre_trained_embedding = keras.layers.Flatten()(pre_trained_embedding)
     
     # 4. Run through some dense layers with batch normalization and dropout
-    full_embedding = keras.layers.Dense(200)(flat_pre_trained_embedding)
+    full_embedding = keras.layers.Dense(100,
+                kernel_regularizer=keras.regularizers.l2(0.01))(flat_pre_trained_embedding)
     full_embedding = keras.layers.BatchNormalization()(full_embedding)
     full_embedding = keras.layers.LeakyReLU(alpha=0.2)(full_embedding)
 
-    full_embedding = keras.layers.Dropout(rate=0.5)(full_embedding)
+    full_embedding = keras.layers.Dropout(rate=0.3)(full_embedding)
 
-    full_embedding = keras.layers.Dense(100)(full_embedding)
-    full_embedding = keras.layers.BatchNormalization()(full_embedding)
-    full_embedding = keras.layers.LeakyReLU(alpha=0.3)(full_embedding)
+#     full_embedding = keras.layers.Dense(100, 
+#                 kernel_regularizer=keras.regularizers.l2(0.01))(full_embedding)
+#     full_embedding = keras.layers.BatchNormalization()(full_embedding)
+#     full_embedding = keras.layers.LeakyReLU(alpha=0.3)(full_embedding)
 
-    full_embedding = keras.layers.Dropout(rate=0.2)(full_embedding)
+#     full_embedding = keras.layers.Dropout(rate=0.2)(full_embedding)
 
-    full_embedding = keras.layers.Dense(50)(full_embedding)
+    full_embedding = keras.layers.Dense(50,
+                kernel_regularizer=keras.regularizers.l2(0.01))(full_embedding)
     full_embedding = keras.layers.BatchNormalization()(full_embedding)
     full_embedding = keras.layers.LeakyReLU(alpha=0.3)(full_embedding)
 
@@ -77,48 +80,58 @@ def street_view_cnn(pretrained_model, image_dim, optimizer, loss, n_classes=3, a
     model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
     
     return model
+def aerial_cnn(pretrained_model, image_dim, optimizer, loss, n_classes=3, activation = 'softmax', metrics=['accuracy']):
+    '''
+    Parameters:
+    - pretrained_model: pretrained model with trainable layers previously defined, make sure top layer is not included
+    - image_dim: input image dimensions
+    - optimizer: predefined optimizer
+    - loss: predefined loss
+    
+    Returns:
+    Compiled model
+    '''
+    
+    # 1. Prepare imput image
+    aerial_input_img = keras.layers.Input(shape=image_dim, name='satellite_image_input')
+    
+    # 2. Pass input image through pretrained model - note that this model is set to trainable/non0tr
+    pre_trained_embedding = pretrained_model(aerial_input_img)
+    
+    # 3. Flatten image embedding
+    flat_pre_trained_embedding = keras.layers.Flatten()(pre_trained_embedding)
+    
+    # 4. Run through some dense layers with batch normalization and dropout
+    full_embedding = keras.layers.Dense(100,
+                kernel_regularizer=keras.regularizers.l2(0.01))(flat_pre_trained_embedding)
+    full_embedding = keras.layers.BatchNormalization()(full_embedding)
+    full_embedding = keras.layers.LeakyReLU(alpha=0.2)(full_embedding)
 
-def satellite_cnn(sat_image_dim = (256, 256, 3),  n_classes = 3, loss_fn = 'categorical_crossentropy', final_layer_activation='softmax', learning_rate = 1e-3):
-    
-    """
-    CNN to classify satellite images
-    3 classes - no driveway (0), driveway (1), unsure (2)
-    """
-    # 1. Satellite Image input
-    sat_input_img = layers.Input(shape=sat_image_dim, name='satellite_image_input')
-    
-    # 2. Define Pretrained CNN - Inception V3
-    pretrained_model = InceptionV3(include_top=False,        # this removes the final dense layer
-                           input_shape=sat_input_img)
-    
-    print('loaded pretrained')
-    # freeze all layers but the top 13 in the model
-    for layer in pretrained_model.layers[:-13]:
-        layer.trainable = False
-    
-    # Get image embedding
-    sat_cnn = pretrained_model(sat_input_img)
-    
-#     sat_cnn = layers.Conv2D(128, (3,3), activation = 'relu')(sat_input_img)
-#     sat_cnn = layers.MaxPooling2D((2,2))(sat_cnn)
-#     sat_cnn = layers.Conv2D(128, (3,3), activation = 'relu')(sat_cnn)
-#     sat_cnn = layers.MaxPooling2D((2,2))(sat_cnn)
-#     sat_cnn = layers.Conv2D(64, (3,3), activation = 'relu')(sat_cnn)
-#     sat_flat = layers.Flatten()(sat_cnn)
-    
-    # 3. Add some dense layers
-    sat_image_embedding = layers.Dense(1000, activation='relu')(sat_cnn)
-    sat_image_embedding = layers.Dense(250, activation='relu')(sat_image_embedding)
-    
-    output = layers.Dense(n_classes, activation=final_layer_activation)(sat_image_embedding)
+#     full_embedding = keras.layers.Dropout(rate=0.3)(full_embedding)
 
-    # 5. define full model and compile
-    model = models.Model(inputs=sat_input_img, outputs=output)
+#     full_embedding = keras.layers.Dense(100, 
+#                 kernel_regularizer=keras.regularizers.l2(0.01))(full_embedding)
+#     full_embedding = keras.layers.BatchNormalization()(full_embedding)
+#     full_embedding = keras.layers.LeakyReLU(alpha=0.3)(full_embedding)
 
-    adam = optimizers.Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, amsgrad=False)
+    full_embedding = keras.layers.Dropout(rate=0.3)(full_embedding)
 
-    model.compile(loss=loss_fn, optimizer=adam, metrics=['accuracy'])
+    full_embedding = keras.layers.Dense(50,
+                kernel_regularizer=keras.regularizers.l2(0.01))(full_embedding)
+    full_embedding = keras.layers.BatchNormalization()(full_embedding)
+    full_embedding = keras.layers.LeakyReLU(alpha=0.3)(full_embedding)
 
+    full_embedding = keras.layers.Dropout(rate=0.2)(full_embedding)
+    
+    # 5. Define output
+    output = keras.layers.Dense(n_classes, activation=activation)(full_embedding)
+    
+    # 6. Define Model 
+    model = keras.models.Model(inputs=aerial_input_img, outputs=output)
+    
+    # 7. Compine Model
+    model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
+    
     return model
 
 def combined_cnn(gsv_image_dim = (640, 640, 3), sat_image_dim = ((2100, 2100, 4)), n_classes = 2, loss_fn = 'binary_crossentropy', final_layer_activation='sigmoid', learning_rate = 1e-3):
